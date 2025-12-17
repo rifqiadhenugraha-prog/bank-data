@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Bank Data Solusi</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+h2 {
+  margin-bottom: 10px;
+}
+input {
+  width: 100%;
+  max-width: 600px;
+  padding: 10px;
+  font-size: 16px;
+}
+.card {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.jawaban {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0a7cff;
+  margin-top: 8px;
+}
+.penjelasan {
+  margin-top: 6px;
+  color: #333;
+}
+.footer {
+  margin-top: 30px;
+  font-size: 12px;
+  color: #888;
+}
+</style>
+</head>
+<body>
+
+<h2>🔍 Bank Data Solusi</h2>
+<input id="search" placeholder="Ketik pertanyaan / kata kunci...">
+
+<div id="hasil"></div>
+
+<div class="footer">
+Data terhubung otomatis dengan Google Sheet
+</div>
+
+<script>
+// LINK GOOGLE SHEET (CSV)
+const SHEET_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTKFxah47zq9eqoXAh7u806FgSTJhjBSN6nBAvli5UkFlhYafFvxYDFURTKy16JhjL3_HodyzWF23qe/pub?output=csv";
+
+let bankData = [];
+
+// Ambil data dari Google Sheet
+fetch(SHEET_URL)
+  .then(res => res.text())
+  .then(csv => {
+    const rows = csv.trim().split("\n");
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i].split(",");
+      if (cols.length >= 3) {
+        bankData.push({
+          pertanyaan: cols[0],
+          jawaban: cols[1],
+          penjelasan: cols[2]
+        });
+      }
+    }
+  })
+  .catch(err => {
+    document.getElementById("hasil").innerHTML =
+      "<p style='color:red'>Gagal memuat data Google Sheet</p>";
+    console.error(err);
+  });
+
+// Search
+document.getElementById("search").addEventListener("input", function () {
+  const key = this.value.toLowerCase();
+  const filtered = bankData.filter(d =>
+    (d.pertanyaan + d.jawaban + d.penjelasan)
+      .toLowerCase()
+      .includes(key)
+  );
+
+  document.getElementById("hasil").innerHTML = filtered.map(d => `
+    <div class="card">
+      <b>Pertanyaan:</b><br>${d.pertanyaan}
+      <div class="jawaban">Jawaban: ${d.jawaban}</div>
+      <div class="penjelasan"><b>Penjelasan:</b><br>${d.penjelasan}</div>
+    </div>
+  `).join("");
+
+  if (this.value && filtered.length === 0) {
+    document.getElementById("hasil").innerHTML =
+      "<p>❌ Data tidak ditemukan</p>";
+  }
+});
+</script>
+
+</body>
+</html>
