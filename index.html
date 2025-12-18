@@ -12,27 +12,42 @@
       font-family: Arial, sans-serif;
       margin: 30px;
     }
+
     input {
       width: 100%;
       max-width: 500px;
       padding: 10px;
       font-size: 16px;
+      margin-bottom: 15px;
     }
-    .card {
-      margin-top: 20px;
-      padding: 15px;
+
+    .header, .card {
+      display: grid;
+      grid-template-columns: 30% 20% 50%;
+      gap: 15px;
+      padding: 12px;
+      align-items: start;
+    }
+
+    .header {
+      font-weight: bold;
+      background: #f5f5f5;
+      border-radius: 6px;
       border: 1px solid #ddd;
-      border-radius: 8px;
     }
+
+    .card {
+      border-bottom: 1px solid #ddd;
+    }
+
     .jawaban {
-      font-size: 20px;
       font-weight: bold;
       color: #0a7cff;
-      margin-top: 5px;
     }
-    .penjelasan {
-      margin-top: 8px;
-      color: #333;
+
+    .not-found {
+      margin-top: 15px;
+      color: red;
     }
   </style>
 </head>
@@ -41,6 +56,12 @@
 <h2>🔍 Bank Data Solusi</h2>
 
 <input type="text" id="search" placeholder="Ketik kata kunci masalah...">
+
+<div class="header">
+  <div>Pertanyaan</div>
+  <div>Jawaban</div>
+  <div>Penjelasan</div>
+</div>
 
 <div id="hasil"></div>
 
@@ -58,7 +79,7 @@ Papa.parse(SHEET_URL, {
   },
   error: function() {
     document.getElementById("hasil").innerHTML =
-      "<p style='color:red'>❌ Gagal mengambil data Google Sheet</p>";
+      "<p class='not-found'>❌ Gagal mengambil data Google Sheet</p>";
   }
 });
 
@@ -67,25 +88,28 @@ const hasil = document.getElementById("hasil");
 
 search.addEventListener("input", function () {
   const key = this.value.toLowerCase().trim();
+
   if (!key) {
     hasil.innerHTML = "";
     return;
   }
 
   const ditemukan = bankData.filter(d =>
-    (d.Pertanyaan + d.Jawaban + d.Penjelasan).toLowerCase().includes(key)
+    (d.Pertanyaan + d.Jawaban + d.Penjelasan)
+      .toLowerCase()
+      .includes(key)
   );
 
   if (ditemukan.length === 0) {
-    hasil.innerHTML = "<p>❌ Data tidak ditemukan</p>";
+    hasil.innerHTML = "<p class='not-found'>❌ Data tidak ditemukan</p>";
     return;
   }
 
   hasil.innerHTML = ditemukan.map(d => `
     <div class="card">
-      <div><b>Pertanyaan:</b><br>${d.Pertanyaan}</div>
-      <div class="jawaban">Jawaban: ${d.Jawaban}</div>
-      <div class="penjelasan"><b>Penjelasan:</b><br>${d.Penjelasan}</div>
+      <div>${d.Pertanyaan}</div>
+      <div class="jawaban">${d.Jawaban}</div>
+      <div>${d.Penjelasan}</div>
     </div>
   `).join("");
 });
