@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Bank Data Objek</title>
+
+  <!-- PapaParse -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      max-width: 500px;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    .header, .row {
+      display: grid;
+      grid-template-columns: 15% 25% 25% 20% 15%;
+      gap: 12px;
+      padding: 10px;
+      align-items: start;
+    }
+
+    .header {
+      font-weight: bold;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+
+    .row {
+      border-bottom: 1px solid #ddd;
+    }
+
+    .not-found {
+      margin-top: 15px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🔍 Bank Data Objek</h2>
+
+<input type="text" id="search" placeholder="Cari merek, kode, pasar, atau model...">
+
+<div class="header">
+  <div>Merek Objek</div>
+  <div>Kode / Nama Faktur</div>
+  <div>Nama Pasar / Niaga</div>
+  <div>Model Objek</div>
+  <div>Kode Model Object</div>
+</div>
+
+<div id="hasil"></div>
+
+<script>
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQJ0NJSv3cJWFgfTJQmyT9H_4C8cC7tc_3ofV0RDJ1HTfmxbrjK_tI-G2xFxP1CTiEiW2DiScSDyhaA/pub?output=csv";
+
+let bankData = [];
+
+Papa.parse(SHEET_URL, {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: function(results) {
+    bankData = results.data;
+  },
+  error: function() {
+    document.getElementById("hasil").innerHTML =
+      "<p class='not-found'>❌ Gagal mengambil data Google Sheet</p>";
+  }
+});
+
+const search = document.getElementById("search");
+const hasil = document.getElementById("hasil");
+
+search.addEventListener("input", function () {
+  const key = this.value.toLowerCase().trim();
+
+  if (!key) {
+    hasil.innerHTML = "";
+    return;
+  }
+
+  const ditemukan = bankData.filter(d =>
+    (
+      (d["MEREK OBJEK"] || "") +
+      (d["KODE / NAMA FAKTUR"] || "") +
+      (d["NAMA PASAR / NIAGA"] || "") +
+      (d["MODEL OBJEK"] || "") +
+      (d["KODE MODEL OBJEK"] || "")
+    ).toLowerCase().includes(key)
+  );
+
+  if (ditemukan.length === 0) {
+    hasil.innerHTML = "<p class='not-found'>❌ Data tidak ditemukan</p>";
+    return;
+  }
+
+  hasil.innerHTML = ditemukan.map(d => `
+    <div class="row">
+      <div>${d["MEREK OBJEK"] || "-"}</div>
+      <div>${d["KODE / NAMA FAKTUR"] || "-"}</div>
+      <div>${d["NAMA PASAR / NIAGA"] || "-"}</div>
+      <div>${d["MODEL OBJEK"] || "-"}</div>
+      <div>${d["KODE MODEL OBJEK"] || "-"}</div>
+    </div>
+  `).join("");
+});
+</script>
+
+</body>
+</html>
