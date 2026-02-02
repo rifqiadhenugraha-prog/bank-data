@@ -19,7 +19,7 @@
 
     .header, .row {
       display: grid;
-      grid-template-columns: 30% 70%;
+      grid-template-columns: 40% 20% 40%;
       gap: 12px;
       padding: 10px;
       align-items: start;
@@ -58,6 +58,7 @@
 
 <div class="header">
   <div>PPYM</div>
+  <div>Area</div>
   <div>File PPYM</div>
 </div>
 
@@ -84,6 +85,7 @@ Papa.parse(SHEET_URL, {
     hasil.innerHTML = data.map(d => `
       <div class="row">
         <div>${d["PPYM"] || "-"}</div>
+        <div>${d["Area"] || "-"}</div>
         <div>
           ${
             d["File PPYM"]
